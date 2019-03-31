@@ -43,5 +43,20 @@ function showTable() {
           response[i].stock_quantity
       );
     }
+    promptUser();
   });
+}
+
+function promptUser() {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        message: "What would you like to purchase?",
+        name: "purchase"
+      }
+    ])
+    .then(function(answer) {
+      console.log(answer.purchase);
+    });
 }
