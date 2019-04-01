@@ -52,11 +52,19 @@ function promptUser() {
     .prompt([
       {
         type: "input",
-        message: "What would you like to purchase?",
+        message:
+          "Please input item id of the product you would like to purchase?",
         name: "purchase"
       }
     ])
     .then(function(answer) {
-      console.log(answer.purchase);
+      // console.log(answer.purchase);
+      connection.query(
+        "select * from products where item_id= '" + answer.purchase + "'",
+        function(err, data) {
+          if (err) throw err;
+          console.log(data);
+        }
+      );
     });
 }
