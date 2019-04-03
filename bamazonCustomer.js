@@ -1,5 +1,6 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+var chalk = require("chalk");
 //connecting to My SQL
 var connection = mysql.createConnection({
   host: "localhost",
@@ -27,20 +28,22 @@ function showTable() {
     // console.log(response);
     for (var i = 0; i < response.length; i++) {
       console.log(
-        "Item ID: " +
-          response[i].item_id +
-          " | " +
-          "Product: " +
-          response[i].product_name +
-          " | " +
-          "Department: " +
-          response[i].department_name +
-          " | " +
-          "Price: " +
-          response[i].price +
-          " | " +
-          "Stock-quantity: " +
-          response[i].stock_quantity
+        chalk.blue.bold(
+          "Item ID: " +
+            response[i].item_id +
+            " | " +
+            "Product: " +
+            response[i].product_name +
+            " | " +
+            "Department: " +
+            response[i].department_name +
+            " | " +
+            "Price: $" +
+            response[i].price +
+            " | " +
+            "Stock-quantity: " +
+            response[i].stock_quantity
+        )
       );
     }
     promptUser();
@@ -77,17 +80,20 @@ function promptUser() {
           //if statement to make sure user enters the correct item id if not then user needs to correctly pick the item id
           if (data.length === 0) {
             console.log(
-              "Product is not available. Please chose item id available in the table."
+              chalk.red.underline.bold(
+                "Product is not available. Please chose item id available in the table."
+              )
             );
             promptUser();
           } else {
             if (data[0].stock_quantity > answer.units) {
-              console.log("READY TO PURCHASE");
+              console.log(chalk.red.underline.bold("READY TO PURCHASE"));
               var total = answer.units * data[0].price;
-              console.log(total);
-              updateData(data[0].item_id, answer.units);
+              console.log(chalk.yellow.bold(" The total is $ " + total));
+              updateData(data[0].item_id, answer.units, data[0].stock_quantity);
             } else {
-              console.log("Insufficient quantity ");
+              console.log(chalk.red.underline.bold("Insufficient quantity "));
+              promptUser();
             }
 
             // promptUnit();
@@ -97,9 +103,21 @@ function promptUser() {
     });
 }
 
-function updateData(id, qty) {
-  // console.log(id + qty);
-  connection.query("", function(err, data) {});
+function updateData(id, qty, stckQty) {
+  console.log(id + qty + stckQty);
+
+  connection.query(
+    "UPDATE products SET stock_quantity='" +
+      (stckQty - qty) +
+      "' where item_id='" +
+      id +
+      "'",
+    function(err, data) {
+      if (err) throw err;
+      console.log(data);
+      showTable();
+    }
+  );
 }
 
 //prompt user to ask user the units of product to purchase
