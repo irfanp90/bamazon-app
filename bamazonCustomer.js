@@ -56,6 +56,11 @@ function promptUser() {
         message:
           "Please choose item id of the product you would like to purchase?",
         name: "purchase"
+      },
+      {
+        type: "input",
+        message: "How many units of the product would you like to buy?",
+        name: "units"
       }
     ])
     .then(function(answer) {
@@ -76,43 +81,56 @@ function promptUser() {
             );
             promptUser();
           } else {
-            console.log("READY TO PURCHASE");
-            promptUnit();
+            if (data[0].stock_quantity > answer.units) {
+              console.log("READY TO PURCHASE");
+              var total = answer.units * data[0].price;
+              console.log(total);
+              updateData(data[0].item_id, answer.units);
+            } else {
+              console.log("Insufficient quantity ");
+            }
+
+            // promptUnit();
           }
         }
       );
     });
 }
 
-//prompt user to ask user the units of product to purchase
-function promptUnit() {
-  inquirer
-    .prompt([
-      {
-        type: "input",
-        message: "How many units of the product would you like to buy?",
-        name: "units"
-      }
-    ])
-    .then(function(answerTwo) {
-      connection.query("select * from products", function(err, response) {
-        if (err) throw err;
-        // console.log(response);
-        for (var i = 0; i < response.length; i++) {
-          var stockQty = response[i].stock_quantity; //query the database by passing id number
-          var qty = answerTwo.units;
-
-          // console.log(qty + " UNITS ");
-          // console.log(" hello " + stockQty);
-          if (qty > stockQty) {
-            console.log(
-              "We are sorry! We only have " +
-                stockQty +
-                " quantities of item selected "
-            );
-            promptUser();
-          }
-        }
-      });
-    });
+function updateData(id, qty) {
+  // console.log(id + qty);
+  connection.query("", function(err, data) {});
 }
+
+//prompt user to ask user the units of product to purchase
+// function promptUnit() {
+//   inquirer
+//     .prompt([
+//       {
+//         type: "input",
+//         message: "How many units of the product would you like to buy?",
+//         name: "units"
+//       }
+//     ])
+//     .then(function(answerTwo) {
+//       connection.query("select * from products", function(err, response) {
+//         if (err) throw err;
+//         // console.log(response);
+//         for (var i = 0; i < response.length; i++) {
+//           var stockQty = response[i].stock_quantity; //query the database by passing id number
+//           var qty = answerTwo.units;
+
+//           // console.log(qty + " UNITS ");
+//           // console.log(" hello " + stockQty);
+//           if (qty > stockQty) {
+//             console.log(
+//               "We are sorry! We only have " +
+//                 stockQty +
+//                 " quantities of item selected "
+//             );
+//             // promptUser();
+//           }
+//         }
+//       });
+//     });
+// }
