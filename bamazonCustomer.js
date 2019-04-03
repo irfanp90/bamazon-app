@@ -60,11 +60,15 @@ function promptUser() {
     ])
     .then(function(answer) {
       // console.log(answer.purchase);
+      var purchase = answer.purchase;
       connection.query(
-        "select * from products where item_id='" + answer.purchase + "'",
+        "select * from products where item_id=?",
+        purchase,
+
         function(err, data) {
           if (err) throw err;
           console.log(data);
+
           //if statement to make sure user enters the correct item id if not then user needs to correctly pick the item id
           if (data.length === 0) {
             console.log(
@@ -72,29 +76,43 @@ function promptUser() {
             );
             promptUser();
           } else {
-            console.log("GOOD");
-            //prompt user to ask user the units of product to purchase
-            inquirer
-              .prompt([
-                {
-                  type: "input",
-                  message:
-                    "How many units of the product would you like to buy?",
-                  name: "units"
-                }
-              ])
-              .then(function(answerTwo) {
-                if (answerTwo.units > response[i].stock_quantity) {
-                  console.log(
-                    "We are sorry! We only have" +
-                      response[i].stock_quantity +
-                      "quantities of item selected "
-                  );
-                  promptUser();
-                }
-              });
+            console.log("READY TO PURCHASE");
+            promptUnit();
           }
         }
       );
+    });
+}
+
+//prompt user to ask user the units of product to purchase
+function promptUnit() {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        message: "How many units of the product would you like to buy?",
+        name: "units"
+      }
+    ])
+    .then(function(answerTwo) {
+      connection.query("select * from products", function(err, response) {
+        if (err) throw err;
+        // console.log(response);
+        for (var i = 0; i < response.length; i++) {
+          var stockQty = response[i].stock_quantity; //query the database by passing id number
+          var qty = answerTwo.units;
+
+          // console.log(qty + " UNITS ");
+          // console.log(" hello " + stockQty);
+          if (qty > stockQty) {
+            console.log(
+              "We are sorry! We only have " +
+                stockQty +
+                " quantities of item selected "
+            );
+            promptUser();
+          }
+        }
+      });
     });
 }
