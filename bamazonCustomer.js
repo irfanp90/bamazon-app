@@ -1,6 +1,7 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 var chalk = require("chalk");
+
 //connecting to My SQL
 var connection = mysql.createConnection({
   host: "localhost",
@@ -19,30 +20,32 @@ var connection = mysql.createConnection({
 connection.connect(function(err) {
   if (err) throw err;
   console.log("connected as id " + connection.threadId);
+
   showTable();
 });
+
 //show user data from the products table
 function showTable() {
-  connection.query("SELECT * FROM products", function(err, response) {
+  connection.query("SELECT * FROM products", function(err, data) {
     if (err) throw err;
     // console.log(response);
-    for (var i = 0; i < response.length; i++) {
+    for (var i = 0; i < data.length; i++) {
       console.log(
         chalk.blue.bold(
           "Item ID: " +
-            response[i].item_id +
+            data[i].item_id +
             " | " +
             "Product: " +
-            response[i].product_name +
+            data[i].product_name +
             " | " +
             "Department: " +
-            response[i].department_name +
+            data[i].department_name +
             " | " +
             "Price: $" +
-            response[i].price +
+            data[i].price +
             " | " +
             "Stock-quantity: " +
-            response[i].stock_quantity
+            data[i].stock_quantity
         )
       );
     }
@@ -75,19 +78,19 @@ function promptUser() {
 
         function(err, data) {
           if (err) throw err;
-          console.log(data);
+          // console.log(data);
 
           //if statement to make sure user enters the correct item id if not then user needs to correctly pick the item id
           if (data.length === 0) {
             console.log(
               chalk.red.underline.bold(
-                "Product is not available. Please chose item id available in the table."
+                "Product is not available on the SHOPPING LIST. Please chose item id available in the table."
               )
             );
             promptUser();
           } else {
             if (data[0].stock_quantity > answer.units) {
-              console.log(chalk.red.underline.bold("READY TO PURCHASE"));
+              // console.log(chalk.red.underline.bold("READY TO PURCHASE"));
               var total = answer.units * data[0].price;
               console.log(chalk.yellow.bold(" The total is $ " + total));
               updateData(data[0].item_id, answer.units, data[0].stock_quantity);
@@ -102,9 +105,9 @@ function promptUser() {
       );
     });
 }
-
+// function to update the stock quanity in mysql
 function updateData(id, qty, stckQty) {
-  console.log(id + qty + stckQty);
+  // console.log(id + qty + stckQty);
 
   connection.query(
     "UPDATE products SET stock_quantity='" +
@@ -114,8 +117,11 @@ function updateData(id, qty, stckQty) {
       "'",
     function(err, data) {
       if (err) throw err;
-      console.log(data);
-      showTable();
+      // console.log(data);
+      console.log(chalk.magenta("THANK YOU FOR SHOPPING. HAVE A GOOD DAY!! "));
+      console.log(chalk.magenta("YOUR ORDER HAS BEEN PROCESSED."));
+      console.log(chalk.magenta("HAVE A GOOD DAY"));
+      // showTable();
     }
   );
 }
